@@ -1,7 +1,7 @@
 import json
 import os
 
-dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'pony_v6_reactor_faceswap.json')
+dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'pony_v6_wanx_faceswap.json')
 
 workflow = {
   "last_node_id": 20,
@@ -58,15 +58,15 @@ workflow = {
       "widgets_values": ["selfie.jpg", "image"]
     },
     {
-      "id": 11, "type": "ReActorFaceSwap", "pos": [1500, 200], "size": [315, 250],
+      "id": 11, "type": "WanxFaceSwap", "pos": [1500, 200], "size": [315, 200],
       "inputs": [
-        {"name": "input_image", "type": "IMAGE", "link": 9},
-        {"name": "source_image", "type": "IMAGE", "link": 10}
+        {"name": "base_image", "type": "IMAGE", "link": 9},
+        {"name": "face_image", "type": "IMAGE", "link": 10}
       ],
-      "outputs": [{"name": "IMAGE", "type": "IMAGE", "links": [11]}],
+      "outputs": [{"name": "swapped_image", "type": "IMAGE", "links": [11]}],
       "widgets_values": [
-        True, "inswapper_128.onnx", "retinaface_resnet50", "none", 1.0, 1.0, 
-        "no", "no", "0", "0", 1
+        "YOUR_DASHSCOPE_API_KEY",
+        "Keep the main body perfectly identical, but replace the character's face completely seamlessly with the portrait provided, ensuring matching photorealistic lighting and skin texture."
       ]
     },
     {

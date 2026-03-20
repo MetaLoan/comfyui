@@ -18,7 +18,6 @@ class QwenFaceSwapNode:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": {
-            "api_key": ("STRING", {"default": "YOUR_DASHSCOPE_API_KEY", "multiline": False}),
             "base_image": ("IMAGE",),
             "face_image": ("IMAGE",),
             "prompt": ("STRING", {"default": "Keep the main body perfectly identical, but replace the character's face completely seamlessly with the portrait provided, ensuring matching photorealistic lighting and skin texture.", "multiline": True}),
@@ -29,12 +28,23 @@ class QwenFaceSwapNode:
     FUNCTION = "swap_face"
     CATEGORY = "Alibaba/Qwen"
 
-    def swap_face(self, api_key, base_image, face_image, prompt):
+    def swap_face(self, base_image, face_image, prompt):
+        import os
+        from dotenv import load_dotenv
+        # Attempt to load from various potential .env locations
+        load_dotenv("/workspace/ComfyUI/.env")
+        load_dotenv("/Users/leo/playbox/.env") 
+        
+        api_key = os.environ.get("DASHSCOPE_API_KEY", "").strip()
+        if not api_key:
+            raise Exception("DASHSCOPE_API_KEY environment variable is not set! Please define it in your .env or system environment.")
+            
+        base_api_url = os.environ.get("DASHSCOPE_BASE_URL", "https://dashscope-intl.aliyuncs.com/api/v1").rstrip('/')
+        endpoint = f"{base_api_url}/services/aigc/multimodal-generation/generation"
+
         print("[Qwen API] Preparing base64 image data...")
         base_url = tensor_to_base64_url(base_image)
         face_url = tensor_to_base64_url(face_image)
-        
-        endpoint = "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation"
         payload = {
             "model": "qwen-image-2.0-pro",
             "input": {

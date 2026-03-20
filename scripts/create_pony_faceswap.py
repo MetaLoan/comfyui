@@ -65,7 +65,6 @@ workflow = {
       ],
       "outputs": [{"name": "swapped_image", "type": "IMAGE", "links": [11]}],
       "widgets_values": [
-        "YOUR_DASHSCOPE_API_KEY",
         "Keep the main body perfectly identical, but replace the character's face completely seamlessly with the portrait provided, ensuring matching photorealistic lighting and skin texture."
       ]
     },

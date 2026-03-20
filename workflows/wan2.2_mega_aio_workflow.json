@@ -617,6 +617,50 @@
       "widgets_values": [
         "wan/Wan2_1-I2V-14B-nsfw.safetensors"
       ]
+    },
+    {
+      "id": 100,
+      "type": "ImageResizeKJv2",
+      "pos": [
+        100,
+        100
+      ],
+      "size": [
+        270,
+        336
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 156
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1001
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageResizeKJv2"
+      },
+      "widgets_values": [
+        832,
+        480,
+        "nearest-exact",
+        "stretch",
+        "0, 0, 0",
+        "center",
+        2,
+        "cpu"
+      ]
     }
   ],
   "links": [
@@ -763,6 +807,14 @@
       10,
       0,
       "CLIP"
+    ],
+    [
+      1001,
+      100,
+      0,
+      34,
+      1,
+      "IMAGE"
     ]
   ],
   "groups": [],

@@ -44,8 +44,44 @@ for node in data["nodes"]:
             
         # Node 10 = Negative Prompt
         if node["id"] == 10:
-            # Drop the specific Asian locks and use the universal prevention of any drift
             node["widgets_values"][0] = "different person, identity change, identity drift, face reconstruction, face morphing, beautified face, generic face, altered facial features, race change, ethnicity change, different ethnicity, caucasian features, european face, asian features if not original, any skin tone change, eye shape change, nose change, lip change, asymmetrical face, distorted face, deformed eyes, deformed mouth, extra teeth, bad anatomy, mutated face, off-model face, wrong facial structure, blurry face, low detail face, overexposed skin, unnatural skin, artifacts on face, motion blur on face, closed mouth the whole time, no saliva, no penis, censored, mosaic, text, watermark, ugly, poorly drawn face, extra limbs, bad proportions, grainy, flickering face, reward hacking stiffness, frozen expression"
+
+# --- Inject Image Resizer to prevent OOM ---
+data["nodes"].append({
+  "id": 100,
+  "type": "ImageResizeKJv2",
+  "pos": [100, 100],
+  "size": [270, 336],
+  "flags": {},
+  "order": 1,
+  "mode": 0,
+  "inputs": [
+    {"name": "image", "type": "IMAGE", "link": 156} # Hijack link 156 from Node 37
+  ],
+  "outputs": [
+    {"name": "IMAGE", "type": "IMAGE", "links": [1001]}
+  ],
+  "properties": {"Node name for S&R": "ImageResizeKJv2"},
+  "widgets_values": [832, 480, "nearest-exact", "stretch", "0, 0, 0", "center", 2, "cpu"]
+})
+
+# Update Link 156 destination: It originally went to Node 34 slot 1.
+# Now Link 156 goes to Node 100 (ImageResize) slot 0
+for link in data["links"]:
+    if link[0] == 156:
+        # [id, from_node, from_slot, to_node, to_slot, type]
+        link[3] = 100 # to_node
+        link[4] = 0   # to_slot
+
+# Add Link 1001 from Node 100 to Node 34
+data["links"].append([1001, 100, 0, 34, 1, "IMAGE"])
+
+# Update Node 34 to receive Link 1001 instead of 156
+for node in data["nodes"]:
+    if node["id"] == 34:
+        for inp in node.get("inputs", []):
+            if inp.get("name") == "image":
+                inp["link"] = 1001
 
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)

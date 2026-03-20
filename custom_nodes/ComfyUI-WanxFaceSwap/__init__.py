@@ -90,7 +90,7 @@ class QwenFaceSwapNode:
         if choices and len(choices) > 0:
             content = choices[0].get("message", {}).get("content", [])
             for item in content:
-                if item.get("type", "").lower() == "image" and item.get("image"):
+                if item.get("image"):
                     result_url = item.get("image")
                     break
         

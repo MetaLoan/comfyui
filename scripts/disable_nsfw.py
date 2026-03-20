@@ -1,10 +1,24 @@
 import os
 import re
 
-dir_path = '/workspace/ComfyUI/custom_nodes/comfyui-reactor-node'
+base_dir = '/workspace/ComfyUI/custom_nodes'
 patched = False
 
 print("Starting deep purge of ReActor NSFW checks...")
+
+# Find the actual reactor folder name
+dir_path = None
+if os.path.exists(base_dir):
+    for d in os.listdir(base_dir):
+        if 'reactor' in d.lower():
+            dir_path = os.path.join(base_dir, d)
+            break
+
+if not dir_path:
+    print("❌ Could not find the ReActor folder in custom_nodes!")
+    exit(1)
+
+print(f"Targeting directory: {dir_path}")
 
 for root, dirs, files in os.walk(dir_path):
     for str_file in files:

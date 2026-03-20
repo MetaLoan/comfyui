@@ -36,16 +36,13 @@ def deploy():
         }
     }
     """
-    
-    # 注入 Civitai Key 和 HF Token, 并在启动时执行仓库里的一键脚本
-    # 注意：RunPod container entrypoint 可以被 dockerArgs 覆盖
-    # 为防止容器运行完直接退出，末尾加 sleep infinity
-    start_cmd = "curl -fsSL https://raw.githubusercontent.com/MetaLoan/comfyui/main/scripts/start_runpod.sh | bash && sleep infinity"
+    # 为了防止 GitHub Raw DNS 污染，我们直接使用 git clone 并且设定重试机制
+    start_cmd = "git clone https://github.com/MetaLoan/comfyui.git /workspace/comfyui-toolkit || (cd /workspace/comfyui-toolkit && git pull); bash /workspace/comfyui-toolkit/scripts/start_runpod.sh"
     
     variables = {
         "input": {
             "name": "ComfyUI-NSFW-Motion",
-            "imageName": "runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04",
+            "imageName": "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
             "gpuCount": 1,
             "volumeInGb": 100,
             "volumeMountPath": "/workspace",

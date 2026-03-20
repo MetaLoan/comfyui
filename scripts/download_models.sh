@@ -142,7 +142,7 @@ echo ""
 echo "========== 模型文件检查 =========="
 for f in \
   "$COMFYUI_DIR/models/wan/wan2.2_i2v_480p_nsfw.safetensors" \
-  "$COMFYUI_DIR/models/vae/Wan2.2_VAE.safetensors" \
+  "$COMFYUI_DIR/models/vae/Wan2.1_VAE.pth" \
   "$COMFYUI_DIR/models/text_encoders/clip_xlm_roberta_large.pth" \
   "$COMFYUI_DIR/models/text_encoders/umt5_xxl.pth" \
   "$COMFYUI_DIR/models/loras/nsfw_motion/doggy_slider.safetensors"; do

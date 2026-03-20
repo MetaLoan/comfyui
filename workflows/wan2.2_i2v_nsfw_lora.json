@@ -38,7 +38,7 @@
       "inputs": [],
       "outputs": [{"name": "vae", "type": "WANVIDEOVAE", "links": [2]}],
       "properties": {"Node name for S&R": "WanVideoVAELoader"},
-      "widgets_values": ["vae/Wan2.2_VAE.safetensors"]
+      "widgets_values": ["Wan2.1_VAE.pth"]
     },
     {
       "id": 3,

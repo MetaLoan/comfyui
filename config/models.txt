@@ -26,8 +26,8 @@
 hf|wan2.2-rapid-mega-aio-nsfw-v10|Phr00t/WAN2.2-14B-Rapid-AllInOne/resolve/main/Mega-v10/wan2.2-rapid-mega-aio-nsfw-v10.safetensors|models/wan
 
 # VAE（官方，无限制）
-hf|Wan2.2_VAE|Wan-AI/Wan2.2-I2V-14B/resolve/main/Wan2.2_VAE.safetensors|models/vae
+hf|Wan2.1_VAE|Wan-AI/Wan2.1-I2V-14B-480P/resolve/main/Wan2.1_VAE.pth|models/vae
 
 # Text Encoders（官方，无限制）
-hf|clip_xlm_roberta_large|Wan-AI/Wan2.2-I2V-14B/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth|models/text_encoders
-hf|umt5_xxl|Wan-AI/Wan2.2-I2V-14B/resolve/main/models_t5_umt5-xxl-enc-bf16.pth|models/text_encoders
+hf|clip_xlm_roberta_large|Wan-AI/Wan2.1-I2V-14B-480P/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth|models/text_encoders
+hf|umt5_xxl|Wan-AI/Wan2.1-I2V-14B-480P/resolve/main/models_t5_umt5-xxl-enc-bf16.pth|models/text_encoders

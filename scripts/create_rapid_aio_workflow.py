@@ -46,23 +46,26 @@ for node in data["nodes"]:
         if node["id"] == 10:
             node["widgets_values"][0] = "different person, identity change, identity drift, face reconstruction, face morphing, beautified face, generic face, altered facial features, race change, ethnicity change, different ethnicity, caucasian features, european face, asian features if not original, any skin tone change, eye shape change, nose change, lip change, asymmetrical face, distorted face, deformed eyes, deformed mouth, extra teeth, bad anatomy, mutated face, off-model face, wrong facial structure, blurry face, low detail face, overexposed skin, unnatural skin, artifacts on face, motion blur on face, closed mouth the whole time, no saliva, no penis, censored, mosaic, text, watermark, ugly, poorly drawn face, extra limbs, bad proportions, grainy, flickering face, reward hacking stiffness, frozen expression"
 
-# --- Inject Image Resizer to prevent OOM ---
+# --- Inject built-in ImageScale to prevent OOM (no custom node dependency) ---
+# ImageScale is a native ComfyUI node, always available, no plugin required.
+# upscale_method: "nearest-exact", crop: "disabled"
+# width=832, height=480 → standard 480p landscape
 data["nodes"].append({
   "id": 100,
-  "type": "ImageResizeKJv2",
+  "type": "ImageScale",
   "pos": [100, 100],
-  "size": [270, 336],
+  "size": [270, 130],
   "flags": {},
   "order": 1,
   "mode": 0,
   "inputs": [
-    {"name": "image", "type": "IMAGE", "link": 161}  # Hijack link 161 from Node 16 (Start Image)
+    {"name": "image", "type": "IMAGE", "link": 161}
   ],
   "outputs": [
     {"name": "IMAGE", "type": "IMAGE", "links": [1001, 1002]}
   ],
-  "properties": {"Node name for S&R": "ImageResizeKJv2"},
-  "widgets_values": [832, 480, "nearest-exact", "stretch", "0, 0, 0", "center", 2, "cpu"]
+  "properties": {"Node name for S&R": "ImageScale"},
+  "widgets_values": ["nearest-exact", 832, 480, "disabled"]
 })
 
 # Update Link 161 destination: It originally went to Node 34 slot 0.

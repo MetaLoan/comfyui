@@ -620,14 +620,14 @@
     },
     {
       "id": 100,
-      "type": "ImageResizeKJv2",
+      "type": "ImageScale",
       "pos": [
         100,
         100
       ],
       "size": [
         270,
-        336
+        130
       ],
       "flags": {},
       "order": 1,
@@ -650,17 +650,13 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "ImageResizeKJv2"
+        "Node name for S&R": "ImageScale"
       },
       "widgets_values": [
+        "nearest-exact",
         832,
         480,
-        "nearest-exact",
-        "stretch",
-        "0, 0, 0",
-        "center",
-        2,
-        "cpu"
+        "disabled"
       ]
     }
   ],

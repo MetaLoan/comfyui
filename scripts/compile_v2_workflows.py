@@ -40,9 +40,8 @@ new_nodes = []
 for node in data["nodes"]:
     if node["id"] == 22: # WanVideoModelLoader
         # Kijai's node looks in models/diffusion_models 
-        # (We will instruct the user to move it, so we just specify the filename or wan/ prefix)
-        # However, Kijai might strictly search 'diffusion_models'. Let's assume the user moves it to diffusion_models
-        node["widgets_values"][0] = "wan2.2-rapid-mega-aio-nsfw-v10.safetensors"
+        # MUST rename to include "14B" to satisfy Kijai's hardcoded parameter size logic!
+        node["widgets_values"][0] = "Wan2_1-I2V-14B-nsfw.safetensors"
         node["widgets_values"][1] = "bf16" # base_precision
         node["widgets_values"][2] = "disabled" # quantization MUST be 'disabled', not 'bf16'
     elif node["id"] == 11: # LoadWanVideoT5TextEncoder

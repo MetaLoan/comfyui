@@ -107,7 +107,12 @@ while IFS='|' read -r source name url dest || [[ -n "$source" ]]; do
         continue
       fi
       FULL_URL="https://civitai.com/api/download/models/${url}?token=${CIVITAI_API_KEY}"
-      dl_file "$FULL_URL" "$OUTPUT_PATH" "$name"
+      if [ ! -f "$OUTPUT_PATH" ]; then
+         echo "⬇️  下载：$name (Civitai)"
+         mkdir -p "$(dirname "$OUTPUT_PATH")"
+         # 强制单线程防止 B2 403
+         wget -q --show-progress -O "$OUTPUT_PATH" "$FULL_URL" || curl -L --progress-bar -o "$OUTPUT_PATH" "$FULL_URL"
+      fi
       ;;
     *)
       echo "⚠️  未知来源 '$source'，跳过：$name"
@@ -132,7 +137,13 @@ else
 
     LORA_PATH="$COMFYUI_DIR/models/$dest_dir/${name}.safetensors"
     CIVITAI_URL="https://civitai.com/api/download/models/${model_id}?token=${CIVITAI_API_KEY}"
-    dl_file "$CIVITAI_URL" "$LORA_PATH" "LoRA: $name"
+    if [ ! -f "$LORA_PATH" ]; then
+      echo "⬇️  下载：LoRA: $name"
+      mkdir -p "$(dirname "$LORA_PATH")"
+      wget -q --show-progress -O "$LORA_PATH" "$CIVITAI_URL" || curl -L --progress-bar -o "$LORA_PATH" "$CIVITAI_URL"
+    else
+      echo "✅ 已存在，跳过：$name"
+    fi
 
   done < "$CONFIG_LORAS"
 fi
@@ -145,6 +156,7 @@ for f in \
   "$COMFYUI_DIR/models/vae/Wan2.1_VAE.pth" \
   "$COMFYUI_DIR/models/text_encoders/clip_xlm_roberta_large.pth" \
   "$COMFYUI_DIR/models/text_encoders/umt5_xxl.pth" \
+  "$COMFYUI_DIR/models/loras/lightning/lightx2v_I2V_14B_480p.safetensors" \
   "$COMFYUI_DIR/models/loras/nsfw_motion/wan_nsfw_e14.safetensors"; do
   if [ -f "$f" ]; then
     printf "✅ %-50s %s\n" "$(basename "$f")" "$(du -sh "$f" | cut -f1)"

@@ -31,3 +31,6 @@ hf|Wan2.1_VAE|Wan-AI/Wan2.1-I2V-14B-480P/resolve/main/Wan2.1_VAE.pth|models/vae
 # Text Encoders（官方，无限制）
 hf|clip_xlm_roberta_large|Wan-AI/Wan2.1-I2V-14B-480P/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth|models/text_encoders
 hf|umt5_xxl|Wan-AI/Wan2.1-I2V-14B-480P/resolve/main/models_t5_umt5-xxl-enc-bf16.pth|models/text_encoders
+
+# Lightning Acceleration LoRA (4-step generation)
+hf|lightx2v_I2V_14B_480p|Kijai/WanVideo_comfy/resolve/main/Lightx2v/lightx2v_I2V_14B_480p_cfg_step_distill_rank128_bf16.safetensors|models/loras/lightning

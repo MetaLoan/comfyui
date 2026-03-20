@@ -116,6 +116,9 @@ for node in data["nodes"]:
                     if inp.get("name") == "lora":
                         inp["link"] = 190
 
+data["last_node_id"] = max([n["id"] for n in data["nodes"]]) + 10
+data["last_link_id"] = max([l[0] for l in data["links"]]) + 10
+
 data["nodes"].extend(new_nodes)
 
 with open(dest_path, 'w', encoding='utf-8') as f:

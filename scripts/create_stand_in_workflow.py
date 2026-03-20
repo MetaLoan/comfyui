@@ -98,7 +98,13 @@ data["links"].append([2003, 200, 0, 28, 5, "IMAGE"])
 data["last_node_id"] = max([n["id"] for n in data["nodes"]]) + 10
 data["last_link_id"] = max([l[0] for l in data["links"]]) + 10
 
+# UNMUTE any nodes that the original creator bypassed (mode 4 -> 0)
+for node in data["nodes"]:
+    node["mode"] = 0
+
+dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_stand_in_v12.json')
+
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 
-print(f"✅ Stand-In Workflow Generated: {dest_path}")
+print(f"✅ Stand-In Workflow Generated (v12 unmuted): {dest_path}")

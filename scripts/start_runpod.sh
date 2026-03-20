@@ -85,7 +85,10 @@ fi
 
 cd "$COMFYUI_DIR"
 
-# 安装 Python 依赖（RunPod 已有 CUDA PyTorch）
+# 强制升级 PyTorch 到 2.4+ (防止 comfy_kitchen fp8 计算报错 AttributeError)
+pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# 安装 Python 依赖
 pip install -q -r requirements.txt
 
 # 创建模型目录

@@ -42,7 +42,7 @@ def deploy():
     variables = {
         "input": {
             "name": "ComfyUI-NSFW-Motion",
-            "imageName": "runpod/pytorch:2.4.0-py3.11-cuda12.4.1-devel-ubuntu22.04",
+            "imageName": "runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04",
             "gpuCount": 1,
             "volumeInGb": 100,
             "volumeMountPath": "/workspace",

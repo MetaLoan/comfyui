@@ -948,9 +948,9 @@
         "Node name for S&R": "WanVideoModelLoader"
       },
       "widgets_values": [
-        "wan/wan2.2-rapid-mega-aio-nsfw-v10.safetensors",
+        "wan2.2-rapid-mega-aio-nsfw-v10.safetensors",
         "bf16",
-        "bf16",
+        "disabled",
         "offload_device",
         "sdpa"
       ],

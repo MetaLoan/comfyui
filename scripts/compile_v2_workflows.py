@@ -39,10 +39,12 @@ for node in data["nodes"]:
 new_nodes = []
 for node in data["nodes"]:
     if node["id"] == 22: # WanVideoModelLoader
-        # ["WanVideo\\Wan2_1-I2V-14B-480P_fp8_e4m3fn.safetensors", "fp16", "fp8_e4m3fn", "offload_device", "sdpa"]
-        node["widgets_values"][0] = "wan/wan2.2-rapid-mega-aio-nsfw-v10.safetensors"
-        node["widgets_values"][1] = "bf16" # Model is safetensors, load as bf16
-        node["widgets_values"][2] = "bf16"
+        # Kijai's node looks in models/diffusion_models 
+        # (We will instruct the user to move it, so we just specify the filename or wan/ prefix)
+        # However, Kijai might strictly search 'diffusion_models'. Let's assume the user moves it to diffusion_models
+        node["widgets_values"][0] = "wan2.2-rapid-mega-aio-nsfw-v10.safetensors"
+        node["widgets_values"][1] = "bf16" # base_precision
+        node["widgets_values"][2] = "disabled" # quantization MUST be 'disabled', not 'bf16'
     elif node["id"] == 11: # LoadWanVideoT5TextEncoder
         node["widgets_values"][0] = "umt5_xxl.pth" # From models/text_encoders
         node["widgets_values"][1] = "bf16"

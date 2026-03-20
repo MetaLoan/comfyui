@@ -2,7 +2,7 @@ import json
 import os
 
 source_path = "/tmp/Rapid-AIO-Mega.json"
-dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_v9.json')
+dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_v10.json')
 
 with open(source_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
@@ -23,14 +23,11 @@ for node in data["nodes"]:
                 inp["link"] = None
 
     elif node["type"] == "WanVaceToVideo":
-        # widgets_values = [width, height, length, strength, reference_strength]
-        # Cap resolution to 832x480 to prevent GPU OOM. Also lower VACE strength for identity.
+        # widgets_values = [width, height, frames, something, something]
+        # Cap resolution to 832x480 to prevent GPU OOM.
+        # DO NOT modify the last two 1.0 values! They are integer mode triggers (1=I2V, 0=T2V).
         node["widgets_values"][0] = 832   # width
         node["widgets_values"][1] = 480   # height
-        # Lower strength from 1.0 to 0.65 (identity-preserving range)
-        for i, v in enumerate(node["widgets_values"]):
-            if isinstance(v, (int, float)) and v == 1 and i not in [0, 1]:
-                node["widgets_values"][i] = 0.65
 
     elif node["type"] == "KSampler":
         node["widgets_values"][2] = 15  # steps

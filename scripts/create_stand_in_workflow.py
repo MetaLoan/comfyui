@@ -2,12 +2,11 @@ import json
 import os
 
 source_path = "/tmp/Rapid-AIO-Mega.json"
-dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_stand_in_v11.json')
+dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_stand_in_v13.json')
 
 with open(source_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
 
-# Process all basic nodes
 for node in data["nodes"]:
     if node["type"] == "CheckpointLoaderSimple":
         node["widgets_values"][0] = "wan/Wan2_1-I2V-14B-nsfw.safetensors"
@@ -35,10 +34,30 @@ for node in data["nodes"]:
         elif node["id"] == 10:
             node["widgets_values"][0] = "different person, identity change, identity drift, face reconstruction, face morphing, beautified face, generic face, altered facial features, race change, ethnicity change, different ethnicity, any skin tone change, eye shape change, nose change, lip change, asymmetrical face, distorted face, deformed eyes, deformed mouth, extra teeth, bad anatomy, mutated face, off-model face, wrong facial structure, blurry face, low detail face, overexposed skin, unnatural skin, artifacts on face, motion blur on face, closed mouth the whole time, no saliva, no penis, censored, mosaic, text, watermark, ugly, poorly drawn face, extra limbs, bad proportions, grainy, flickering face, frozen expression"
 
-# The original image from LoadImage(16) uses Link 161.
-# Link 161 natively goes to Node 34 slot 0. We leave that INTACT!
-# We just add Stand-In nodes and wire LoadImage(16) -> StandIn(200) -> WanVaceToVideo(28).
+# UNMUTE any bypassed nodes! Must be done cleanly.
+for node in data["nodes"]:
+    node["mode"] = 0
 
+# Add standard ImageScale (Node 100) to shrink high-res user inputs to 832x480 FIRST!
+data["nodes"].append({
+  "id": 100,
+  "type": "ImageScale",
+  "pos": [100, 100],
+  "size": [270, 130],
+  "flags": {},
+  "order": 1,
+  "mode": 0,
+  "inputs": [
+    {"name": "image", "type": "IMAGE", "link": 160} # Link 160 from Node 16
+  ],
+  "outputs": [
+    {"name": "IMAGE", "type": "IMAGE", "links": [1001, 1002]} # To Node 34 & Node 200
+  ],
+  "properties": {"Node name for S&R": "ImageScale"},
+  "widgets_values": ["nearest-exact", 832, 480, "disabled"]
+})
+
+# Add Stand-In nodes
 data["nodes"].append({
   "id": 201,
   "type": "FaceProcessorLoader",
@@ -65,46 +84,46 @@ data["nodes"].append({
   "mode": 0,
   "inputs": [
     {"name": "face_processor", "type": "FACE_PROCESSOR", "link": 2001},
-    {"name": "image", "type": "IMAGE", "link": 2002}
+    {"name": "image", "type": "IMAGE", "link": 1002} # From ImageScale!
   ],
   "outputs": [
     {"name": "processed_image", "type": "IMAGE", "links": [2003]},
     {"name": "face_rgba", "type": "IMAGE", "links": []}
   ],
   "properties": {"Node name for S&R": "ApplyFaceProcessor"},
-  "widgets_values": [512, 10, 1.5, 0.5, False, False] # resize_to=512, border_thresh=10, face_crop_scale=1.5, conf=0.5, with_neck=False, face_only=False
+  "widgets_values": [512, 10, 1.5, 0.5, False, False]
 })
 
-# Add Link 2001: FaceProcessorLoader -> ApplyFaceProcessor
-data["links"].append([2001, 201, 0, 200, 0, "FACE_PROCESSOR"])
+# Fix/Reroute the original link 161
+# Link 161 natively connected Node 16 (LoadImage) to Node 34 (VACE Start Frame).
+# We completely strip link 161 and replace with our new robust link tree.
+data["links"] = [l for l in data["links"] if l[0] != 161]
 
-# Wire LoadImage(16) to ApplyFaceProcessor(200) via new Link 2002
+# Redefine Node 16 (LoadImage) output connections: just one link -> 160
 for node in data["nodes"]:
     if node["id"] == 16:
-        if node["outputs"][0].get("links") is not None:
-            node["outputs"][0]["links"].append(2002)
-
-data["links"].append([2002, 16, 0, 200, 1, "IMAGE"])
-
-# Wire ApplyFaceProcessor(200) to WanVaceToVideo(28) reference_image via Link 2003
-for node in data["nodes"]:
-    if node["id"] == 28:
+        if "outputs" in node and len(node["outputs"]) > 0:
+            node["outputs"][0]["links"] = [160]
+    elif node["id"] == 34:
+        for inp in node.get("inputs", []):
+            if inp.get("name") in ["image", "start_image"]:
+                inp["link"] = 1001
+    elif node["id"] == 28:
         for inp in node.get("inputs", []):
             if inp.get("name") == "reference_image":
                 inp["link"] = 2003
 
-data["links"].append([2003, 200, 0, 28, 5, "IMAGE"])
+# Rebuild all core link lines explicitly
+data["links"].append([160, 16, 0, 100, 0, "IMAGE"]) # LoadImage -> ImageScale
+data["links"].append([1001, 100, 0, 34, 0, "IMAGE"]) # ImageScale -> VACE (Start Image)
+data["links"].append([1002, 100, 0, 200, 1, "IMAGE"]) # ImageScale -> StandIn Image
+data["links"].append([2001, 201, 0, 200, 0, "FACE_PROCESSOR"]) # StandIn Loader -> Apply Face
+data["links"].append([2003, 200, 0, 28, 5, "IMAGE"]) # Apply Face -> VaceToVideo Ref Image
 
 data["last_node_id"] = max([n["id"] for n in data["nodes"]]) + 10
 data["last_link_id"] = max([l[0] for l in data["links"]]) + 10
 
-# UNMUTE any nodes that the original creator bypassed (mode 4 -> 0)
-for node in data["nodes"]:
-    node["mode"] = 0
-
-dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_stand_in_v12.json')
-
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 
-print(f"✅ Stand-In Workflow Generated (v12 unmuted): {dest_path}")
+print(f"✅ Stand-In Workflow Generated (v13 ImageScale Anti-OOM): {dest_path}")

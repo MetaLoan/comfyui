@@ -387,7 +387,7 @@
           "name": "reference_image",
           "shape": 7,
           "type": "IMAGE",
-          "link": null
+          "link": 1002
         },
         {
           "name": "length",
@@ -814,6 +814,14 @@
       0,
       34,
       1,
+      "IMAGE"
+    ],
+    [
+      1002,
+      100,
+      0,
+      28,
+      5,
       "IMAGE"
     ]
   ],

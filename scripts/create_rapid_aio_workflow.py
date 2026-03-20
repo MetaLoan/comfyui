@@ -73,8 +73,11 @@ for link in data["links"]:
         link[3] = 100 # to_node
         link[4] = 0   # to_slot
 
-# Add Link 1001 from Node 100 to Node 34
+# Add Link 1001 from Node 100 to Node 34 (StartToEndFrame image)
 data["links"].append([1001, 100, 0, 34, 1, "IMAGE"])
+
+# Add Link 1002 from Node 100 to Node 28 (WanVaceToVideo reference_image)
+data["links"].append([1002, 100, 0, 28, 5, "IMAGE"])
 
 # Update Node 34 to receive Link 1001 instead of 156
 for node in data["nodes"]:
@@ -82,6 +85,12 @@ for node in data["nodes"]:
         for inp in node.get("inputs", []):
             if inp.get("name") == "image":
                 inp["link"] = 1001
+    
+    # Update Node 28 to receive Link 1002 for reference_image
+    elif node["id"] == 28:
+        for inp in node.get("inputs", []):
+            if inp.get("name") == "reference_image":
+                inp["link"] = 1002
 
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)

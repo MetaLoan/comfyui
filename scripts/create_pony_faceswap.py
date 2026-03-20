@@ -88,7 +88,11 @@ workflow = {
     [9, 9, 0, 11, 0, "IMAGE"],
     [10, 10, 0, 11, 1, "IMAGE"],
     [11, 11, 0, 12, 0, "IMAGE"]
-  ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {},
+  "version": 0.4
 }
 
 with open(dest_path, 'w', encoding='utf-8') as f:

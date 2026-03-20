@@ -22,7 +22,7 @@
       "outputs": [{"name": "model", "type": "WANVIDEOMODEL", "links": [1]}],
       "properties": {"Node name for S&R": "WanVideoModelLoader"},
       "widgets_values": [
-        "wan/wan2.2_i2v_14B_480p.safetensors",
+        "wan/wan2.2_i2v_14B_480p_nsfw.safetensors",
         "bf16",
         "offload_model"
       ]

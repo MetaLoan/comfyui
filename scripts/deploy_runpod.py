@@ -15,6 +15,8 @@ def deploy():
     runpod_key = env_keys.get("Runpod_api_key")
     civitai_key = env_keys.get("CIVITAI_API_KEY", "")
 
+    hf_token = env_keys.get("HF_TOKEN", "")
+
     if not runpod_key:
         print("❌ 未在 .env 找到 Runpod_api_key")
         return
@@ -35,7 +37,7 @@ def deploy():
     }
     """
     
-    # 注入 Civitai Key, 并在启动时执行仓库里的一键脚本
+    # 注入 Civitai Key 和 HF Token, 并在启动时执行仓库里的一键脚本
     # 注意：RunPod container entrypoint 可以被 dockerArgs 覆盖
     # 为防止容器运行完直接退出，末尾加 sleep infinity
     start_cmd = "curl -fsSL https://raw.githubusercontent.com/MetaLoan/comfyui/main/scripts/start_runpod.sh | bash && sleep infinity"
@@ -54,7 +56,8 @@ def deploy():
             "cloudType": "SECURE",
             "ports": "8188/http",
             "env": [
-                {"key": "CIVITAI_API_KEY", "value": civitai_key}
+                {"key": "CIVITAI_API_KEY", "value": civitai_key},
+                {"key": "HF_TOKEN", "value": hf_token}
             ],
             "dockerArgs": f"bash -c \"{start_cmd}\""
         }

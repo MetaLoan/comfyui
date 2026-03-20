@@ -2,7 +2,7 @@ import json
 import os
 
 source_path = "/tmp/Rapid-AIO-Mega.json"
-dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_workflow.json')
+dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_v8.json')
 
 with open(source_path, 'r', encoding='utf-8') as f:
     data = json.load(f)

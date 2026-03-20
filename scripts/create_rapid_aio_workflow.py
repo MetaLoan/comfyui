@@ -56,30 +56,30 @@ data["nodes"].append({
   "order": 1,
   "mode": 0,
   "inputs": [
-    {"name": "image", "type": "IMAGE", "link": 156} # Hijack link 156 from Node 37
+    {"name": "image", "type": "IMAGE", "link": 161}  # Hijack link 161 from Node 16 (Start Image)
   ],
   "outputs": [
-    {"name": "IMAGE", "type": "IMAGE", "links": [1001]}
+    {"name": "IMAGE", "type": "IMAGE", "links": [1001, 1002]}
   ],
   "properties": {"Node name for S&R": "ImageResizeKJv2"},
   "widgets_values": [832, 480, "nearest-exact", "stretch", "0, 0, 0", "center", 2, "cpu"]
 })
 
-# Update Link 156 destination: It originally went to Node 34 slot 1.
-# Now Link 156 goes to Node 100 (ImageResize) slot 0
+# Update Link 161 destination: It originally went to Node 34 slot 0.
+# Now Link 161 goes to Node 100 (ImageResize) slot 0
 for link in data["links"]:
-    if link[0] == 156:
+    if link[0] == 161:
         # [id, from_node, from_slot, to_node, to_slot, type]
         link[3] = 100 # to_node
         link[4] = 0   # to_slot
 
 # Add Link 1001 from Node 100 to Node 34 (StartToEndFrame image)
-data["links"].append([1001, 100, 0, 34, 1, "IMAGE"])
+data["links"].append([1001, 100, 0, 34, 0, "IMAGE"])
 
 # Add Link 1002 from Node 100 to Node 28 (WanVaceToVideo reference_image)
 data["links"].append([1002, 100, 0, 28, 5, "IMAGE"])
 
-# Update Node 34 to receive Link 1001 instead of 156
+# Update Node 34 to receive Link 1001 instead of 161
 for node in data["nodes"]:
     if node["id"] == 34:
         for inp in node.get("inputs", []):
@@ -91,6 +91,9 @@ for node in data["nodes"]:
         for inp in node.get("inputs", []):
             if inp.get("name") == "reference_image":
                 inp["link"] = 1002
+
+data["last_node_id"] = max([n["id"] for n in data["nodes"]]) + 10
+data["last_link_id"] = max([l[0] for l in data["links"]]) + 10
 
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)

@@ -67,7 +67,7 @@
       "outputs": [{"name": "MODEL", "type": "WANVIDEOMODEL", "links": [5]}],
       "properties": {"Node name for S&R": "LoraLoaderModelOnly"},
       "widgets_values": [
-        "loras/nsfw_motion/doggy_slider.safetensors",
+        "loras/nsfw_motion/wan_nsfw_e14.safetensors",
         1.0
       ]
     },

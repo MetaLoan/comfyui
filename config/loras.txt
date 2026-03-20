@@ -2,9 +2,9 @@
 # 格式：名称|Civitai Model ID|存放子目录
 # 下载脚本会使用 CIVITAI_API_KEY 环境变量访问 API
 # ⚠️ API Key 请存放在项目根目录的 .env 文件中，不要写在这里
-# Doggy Style Slider LoRA（Wan 2.2 I2V 版）
-# Civitai 搜索: "Doggy slider T2V I2V Wan2.2"
-doggy_slider|949735|loras/nsfw_motion
+# General NSFW LoRA (Wan 2.1)
+# 来源: https://civitai.com/models/1307155
+wan_nsfw_e14|1475095|nsfw_motion
 
 # 如需添加更多 LoRA，按上面格式追加即可
 # 例如：cowgirl_motion|XXXXXX|loras/nsfw_motion

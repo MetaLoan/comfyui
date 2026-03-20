@@ -174,7 +174,7 @@
           "name": "start_image",
           "shape": 7,
           "type": "IMAGE",
-          "link": 161
+          "link": 1001
         },
         {
           "name": "end_image",

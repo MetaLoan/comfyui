@@ -66,31 +66,33 @@ data["nodes"].append({
 })
 
 # Update Link 161 destination: It originally went to Node 34 slot 0.
-# Now Link 161 goes to Node 100 (ImageResize) slot 0
+# Now Link 161 goes to Node 100 (ImageResize) slot 0.
+# CRITICAL: Must also fix Node 16's output.links AND Node 34's input.link so
+# ComfyUI's frontend double-sided link validation passes without errors.
 for link in data["links"]:
     if link[0] == 161:
-        # [id, from_node, from_slot, to_node, to_slot, type]
-        link[3] = 100 # to_node
-        link[4] = 0   # to_slot
+        link[3] = 100  # redirect to_node
+        link[4] = 0    # to_slot
 
-# Add Link 1001 from Node 100 to Node 34 (StartToEndFrame image)
-data["links"].append([1001, 100, 0, 34, 0, "IMAGE"])
-
-# Add Link 1002 from Node 100 to Node 28 (WanVaceToVideo reference_image)
-data["links"].append([1002, 100, 0, 28, 5, "IMAGE"])
-
-# Update Node 34 to receive Link 1001 instead of 161
+# Fix Node 16 output[0].links: it still says [161] pointing to Node 34,
+# but we kept link 161 (just rerouted it to Node 100), so no change needed there.
+# However we must clear Node 34 input.link so it no longer claims link 161.
+# And Node 34 input.link will be 1001 (the new one from Node 100 output).
 for node in data["nodes"]:
     if node["id"] == 34:
         for inp in node.get("inputs", []):
-            if inp.get("name") == "image":
-                inp["link"] = 1001
-    
-    # Update Node 28 to receive Link 1002 for reference_image
+            if inp.get("name") == "start_image":  # MUST be "start_image", NOT "image"
+                inp["link"] = 1001  # receives from Node 100 now
     elif node["id"] == 28:
         for inp in node.get("inputs", []):
             if inp.get("name") == "reference_image":
                 inp["link"] = 1002
+
+# Add Link 1001: Node 100 → Node 34 slot 0 (start image)
+data["links"].append([1001, 100, 0, 34, 0, "IMAGE"])
+
+# Add Link 1002: Node 100 → Node 28 slot 5 (reference_image)
+data["links"].append([1002, 100, 0, 28, 5, "IMAGE"])
 
 data["last_node_id"] = max([n["id"] for n in data["nodes"]]) + 10
 data["last_link_id"] = max([l[0] for l in data["links"]]) + 10

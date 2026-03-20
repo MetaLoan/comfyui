@@ -37,14 +37,15 @@ for node in data["nodes"]:
     elif node["type"] == "CLIPTextEncode":
         # Node 9 = Positive Prompt
         if node["id"] == 9:
-            original_prompt = node["widgets_values"][0]
-            new_prompt = "(exact same ethnicity as reference:1.6), (Asian woman, East Asian features:1.5), (preserve original ethnicity:1.5), identical face identity, consistent racial characteristics, almond-shaped eyes, natural skin tone, no caucasian features, no european facial structure, (photorealistic portrait of the same person:1.4), face remains exactly the same throughout all frames, no face reconstruction, no beautification drift, detailed original facial structure, " + str(original_prompt)
-            node["widgets_values"][0] = new_prompt
+            # We must use a completely universal race-agnostic locking prompt so the user can use any image safely
+            base_prompt = "(exact same person as the reference image:1.6), (identical facial identity:1.6), (preserve original face exactly:1.5), (consistent character identity throughout all frames:1.5), (same face, no face change, no identity drift, no reconstruction, no beautification, no morphing:1.4), face remains exactly the same person from start to end, photorealistic portrait fidelity, detailed original facial features and structure, natural skin texture and pores as in input image, no alterations to facial appearance, "
+            action_prompt = "woman performing blowjob, close-up on face only, POV angle from above, erect penis entering and sliding in and out of her mouth, lips tightly wrapped around shaft, tongue visibly licking underside, saliva dripping from mouth corners and chin with glossy strands, eyes looking up seductively at viewer, slight gag reflex on deep thrusts, cheeks hollowing intensely while sucking, wet glistening lips and lower face, head moving forward and backward rhythmically, slow deep throating first 2 seconds then faster bobbing for remaining time, smooth fluid head motion and oral action, erotic focused pleasure expression, high detail realistic skin and saliva, smooth and fluid motion, static camera, high quality, detailed realistic lighting, consistent identity, stable facial features, clean minimal background"
+            node["widgets_values"][0] = base_prompt + action_prompt
             
         # Node 10 = Negative Prompt
         if node["id"] == 10:
-            # We must clear the accidental positive tags we appended before!
-            node["widgets_values"][0] = "caucasian, white woman, european face, big blue eyes, high nose bridge, different ethnicity, race changed, mixed race, generic beautified face, blurry, deformed, ugly, extra limbs, bad anatomy, watermelon"
+            # Drop the specific Asian locks and use the universal prevention of any drift
+            node["widgets_values"][0] = "different person, identity change, identity drift, face reconstruction, face morphing, beautified face, generic face, altered facial features, race change, ethnicity change, different ethnicity, caucasian features, european face, asian features if not original, any skin tone change, eye shape change, nose change, lip change, asymmetrical face, distorted face, deformed eyes, deformed mouth, extra teeth, bad anatomy, mutated face, off-model face, wrong facial structure, blurry face, low detail face, overexposed skin, unnatural skin, artifacts on face, motion blur on face, closed mouth the whole time, no saliva, no penis, censored, mosaic, text, watermark, ugly, poorly drawn face, extra limbs, bad proportions, grainy, flickering face, reward hacking stiffness, frozen expression"
 
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)

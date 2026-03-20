@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 # =============================================================================
-# download_models.sh — 模型下载脚本
-# 用途：下载 Wan 2.2 I2V 主模型 + NSFW Motion LoRA
-# 需要：CIVITAI_API_KEY 环境变量（用于下载 LoRA）
+# download_models.sh — 模型下载脚本（支持 HuggingFace 和 Civitai）
+# 用途：下载 Wan 2.2 NSFW 增强版主模型 + Motion LoRA
 # =============================================================================
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 COMFYUI_DIR="$REPO_DIR/ComfyUI"
 
+# 自动加载 .env
+if [ -f "$REPO_DIR/.env" ]; then
+  export $(grep -v '^#' "$REPO_DIR/.env" | xargs)
+  echo "✅ 已加载 .env 配置"
+fi
+
 echo "=========================================="
-echo "  模型下载"
+echo "  模型下载（NSFW 增强版）"
 echo "=========================================="
 
 # 检查 ComfyUI 目录
@@ -19,134 +24,136 @@ if [ ! -d "$COMFYUI_DIR" ]; then
   exit 1
 fi
 
-# 检查下载工具
+# 选择下载工具
 if command -v aria2c &>/dev/null; then
-  DOWNLOADER="aria2c"
   echo "✅ 使用 aria2c 多线程下载"
+  DL_TOOL="aria2c"
 elif command -v wget &>/dev/null; then
-  DOWNLOADER="wget"
   echo "✅ 使用 wget 下载"
+  DL_TOOL="wget"
 else
-  DOWNLOADER="curl"
   echo "✅ 使用 curl 下载"
+  DL_TOOL="curl"
 fi
 
-# 通用下载函数
-download_file() {
+# ---------- 通用下载函数 ----------
+dl_file() {
   local url="$1"
   local output="$2"
   local description="$3"
+  local auth_header="${4:-}"   # 可选：Authorization 头
 
   if [ -f "$output" ]; then
-    echo "✅ 已存在，跳过：$description"
+    local size
+    size=$(du -sh "$output" | cut -f1)
+    echo "✅ 已存在，跳过：$description ($size)"
     return 0
   fi
 
-  echo "⬇️  下载中：$description"
+  echo "⬇️  下载：$description"
   mkdir -p "$(dirname "$output")"
 
-  if [ "$DOWNLOADER" = "aria2c" ]; then
-    aria2c -x 8 -s 8 -k 1M -o "$(basename "$output")" -d "$(dirname "$output")" "$url"
-  elif [ "$DOWNLOADER" = "wget" ]; then
-    wget -q --show-progress -O "$output" "$url"
-  else
-    curl -L --progress-bar -o "$output" "$url"
-  fi
+  case "$DL_TOOL" in
+    aria2c)
+      aria2c -x 16 -s 16 -k 1M --console-log-level=error \
+        ${auth_header:+--header="$auth_header"} \
+        -o "$(basename "$output")" -d "$(dirname "$output")" "$url"
+      ;;
+    wget)
+      wget -q --show-progress \
+        ${auth_header:+--header="$auth_header"} \
+        -O "$output" "$url"
+      ;;
+    curl)
+      curl -L --progress-bar \
+        ${auth_header:+-H "$auth_header"} \
+        -o "$output" "$url"
+      ;;
+  esac
 
-  echo "✅ 下载完成：$description"
+  echo "✅ 完成：$description"
 }
 
-# ---------- 1. 下载 Wan 2.2 I2V 主模型 ----------
+# ---------- 1. 下载主模型（读取 models.txt）----------
 echo ""
-echo "[1/3] 下载 Wan 2.2 I2V 主模型..."
-echo "⚠️  文件较大（~14GB 以上），请确保网络稳定和磁盘空间充足"
+echo "[1/2] 下载 Wan 2.2 NSFW 增强版主模型..."
 
-# Wan 2.2 480p I2V 模型（较小，适合测试）
-download_file \
-  "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/wan2.2_i2v_14B_480p.safetensors" \
-  "$COMFYUI_DIR/models/wan/wan2.2_i2v_14B_480p.safetensors" \
-  "Wan2.2 I2V 14B 480p"
+CONFIG_MODELS="$REPO_DIR/config/models.txt"
 
-# VAE
-download_file \
-  "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/Wan2.2_VAE.safetensors" \
-  "$COMFYUI_DIR/models/vae/Wan2.2_VAE.safetensors" \
-  "Wan2.2 VAE"
+while IFS='|' read -r source name url dest || [[ -n "$source" ]]; do
+  # 跳过注释和空行
+  [[ "$source" =~ ^#.*$ ]] && continue
+  [[ -z "$source" ]] && continue
 
-# Text Encoders
-download_file \
-  "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth" \
-  "$COMFYUI_DIR/models/text_encoders/clip_xlm_roberta_large.pth" \
-  "CLIP Text Encoder"
+  OUTPUT_PATH="$COMFYUI_DIR/$dest/${name}.safetensors"
+  # pth 格式兼容
+  if [[ "$url" == *.pth ]]; then
+    OUTPUT_PATH="$COMFYUI_DIR/$dest/${name}.pth"
+  fi
 
-download_file \
-  "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/models_t5_umt5-xxl-enc-bf16.pth" \
-  "$COMFYUI_DIR/models/text_encoders/umt5_xxl.pth" \
-  "T5 Text Encoder"
+  case "$source" in
+    hf)
+      # HuggingFace 下载
+      FULL_URL="https://huggingface.co/$url"
+      AUTH_HEADER=""
+      [ -n "$HF_TOKEN" ] && AUTH_HEADER="Authorization: Bearer $HF_TOKEN"
+      dl_file "$FULL_URL" "$OUTPUT_PATH" "$name" "$AUTH_HEADER"
+      ;;
+    civitai)
+      # Civitai 下载（Civitai 格式：civitai|name|model_id|dest）
+      if [ -z "$CIVITAI_API_KEY" ]; then
+        echo "⚠️  CIVITAI_API_KEY 未设置，跳过 Civitai 模型：$name"
+        continue
+      fi
+      FULL_URL="https://civitai.com/api/download/models/${url}?token=${CIVITAI_API_KEY}"
+      dl_file "$FULL_URL" "$OUTPUT_PATH" "$name"
+      ;;
+    *)
+      echo "⚠️  未知来源 '$source'，跳过：$name"
+      ;;
+  esac
+
+done < "$CONFIG_MODELS"
 
 # ---------- 2. 下载 NSFW Motion LoRA ----------
 echo ""
-echo "[2/3] 下载 NSFW Motion LoRA..."
+echo "[2/2] 下载 NSFW Motion LoRA..."
+
+CONFIG_LORAS="$REPO_DIR/config/loras.txt"
 
 if [ -z "$CIVITAI_API_KEY" ]; then
-  echo "⚠️  未设置 CIVITAI_API_KEY，跳过 LoRA 下载"
-  echo "   手动设置方式：export CIVITAI_API_KEY=your_key_here"
+  echo "⚠️  CIVITAI_API_KEY 未设置，跳过所有 LoRA 下载"
+  echo "   请在 .env 中配置：CIVITAI_API_KEY=your_key"
 else
-  CONFIG_FILE="$REPO_DIR/config/loras.txt"
-
   while IFS='|' read -r name model_id dest_dir || [[ -n "$name" ]]; do
-    # 跳过注释和空行
     [[ "$name" =~ ^#.*$ ]] && continue
-    [[ -z "$name" ]] && continue
+    [[ -z "$name" || -z "$model_id" ]] && continue
 
-    DEST_PATH="$COMFYUI_DIR/models/$dest_dir/${name}.safetensors"
-
-    if [ -f "$DEST_PATH" ]; then
-      echo "✅ 已存在，跳过：$name"
-      continue
-    fi
-
-    echo "⬇️  下载 LoRA：$name (Civitai ID: $model_id)"
-    mkdir -p "$COMFYUI_DIR/models/$dest_dir"
-
+    LORA_PATH="$COMFYUI_DIR/models/$dest_dir/${name}.safetensors"
     CIVITAI_URL="https://civitai.com/api/download/models/${model_id}?token=${CIVITAI_API_KEY}"
+    dl_file "$CIVITAI_URL" "$LORA_PATH" "LoRA: $name"
 
-    if [ "$DOWNLOADER" = "aria2c" ]; then
-      aria2c -x 4 -s 4 -o "${name}.safetensors" -d "$COMFYUI_DIR/models/$dest_dir" "$CIVITAI_URL"
-    elif [ "$DOWNLOADER" = "wget" ]; then
-      wget -q --show-progress -O "$DEST_PATH" "$CIVITAI_URL"
-    else
-      curl -L --progress-bar -o "$DEST_PATH" "$CIVITAI_URL"
-    fi
-
-    echo "✅ LoRA 下载完成：$name"
-  done < "$CONFIG_FILE"
+  done < "$CONFIG_LORAS"
 fi
 
-# ---------- 3. 检查完整性 ----------
+# ---------- 汇总检查 ----------
 echo ""
-echo "[3/3] 检查模型文件..."
-
-check_file() {
-  local path="$1"
-  local name="$2"
-  if [ -f "$path" ]; then
-    SIZE=$(du -sh "$path" | cut -f1)
-    echo "✅ $name ($SIZE)"
+echo "========== 模型文件检查 =========="
+for f in \
+  "$COMFYUI_DIR/models/wan/wan2.2_i2v_480p_nsfw.safetensors" \
+  "$COMFYUI_DIR/models/vae/Wan2.2_VAE.safetensors" \
+  "$COMFYUI_DIR/models/text_encoders/clip_xlm_roberta_large.pth" \
+  "$COMFYUI_DIR/models/text_encoders/umt5_xxl.pth" \
+  "$COMFYUI_DIR/models/loras/nsfw_motion/doggy_slider.safetensors"; do
+  if [ -f "$f" ]; then
+    printf "✅ %-50s %s\n" "$(basename "$f")" "$(du -sh "$f" | cut -f1)"
   else
-    echo "❌ 缺失：$name"
+    printf "❌ %-50s 缺失\n" "$(basename "$f")"
   fi
-}
-
-check_file "$COMFYUI_DIR/models/wan/wan2.2_i2v_14B_480p.safetensors" "Wan2.2 I2V 主模型"
-check_file "$COMFYUI_DIR/models/vae/Wan2.2_VAE.safetensors" "VAE"
-check_file "$COMFYUI_DIR/models/text_encoders/clip_xlm_roberta_large.pth" "CLIP Encoder"
-check_file "$COMFYUI_DIR/models/text_encoders/umt5_xxl.pth" "T5 Encoder"
+done
 
 echo ""
 echo "=========================================="
-echo "✅ 模型下载任务完成！"
-echo ""
-echo "下一步："
-echo "  cd ComfyUI && python3 main.py --port 8188"
+echo "✅ 下载完成！"
+echo "   启动命令：cd ComfyUI && python3 main.py --port 8188"
 echo "=========================================="

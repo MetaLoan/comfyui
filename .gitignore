@@ -25,8 +25,12 @@ output/
 
 # ===== 系统文件 =====
 .DS_Store
-.env
 *.log
+
+# ===== 敏感文件（API Keys）=====
+.env
+.env.*
+!.env.example
 
 # ===== 临时文件 =====
 tmp/

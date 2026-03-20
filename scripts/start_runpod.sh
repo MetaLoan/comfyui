@@ -122,71 +122,13 @@ install_node "ComfyUI-KJNodes" \
 
 # ---------- 5. 下载模型 ----------
 echo ""
-echo "[5/6] 下载模型..."
+echo "[6/6] 下载模型..."
 
 if [ "${SKIP_MODELS:-0}" = "1" ]; then
   echo "⚠️  SKIP_MODELS=1，跳过模型下载（调试模式）"
 else
-  # 下载函数（使用 aria2c 多线程）
-  dl() {
-    local url="$1"
-    local out="$2"
-    local name="$3"
-
-    if [ -f "$out" ]; then
-      SIZE=$(du -sh "$out" | cut -f1)
-      echo "✅ 已存在，跳过：$name ($SIZE)"
-      return
-    fi
-
-    echo "⬇️  下载：$name"
-    mkdir -p "$(dirname "$out")"
-    aria2c -x 16 -s 16 -k 1M --console-log-level=error \
-      -o "$(basename "$out")" -d "$(dirname "$out")" \
-      "${HF_TOKEN:+--header=Authorization: Bearer $HF_TOKEN}" \
-      "$url"
-    echo "✅ 完成：$name"
-  }
-
-  # Wan 2.2 I2V 主模型
-  dl \
-    "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/wan2.2_i2v_14B_480p.safetensors" \
-    "$COMFYUI_DIR/models/wan/wan2.2_i2v_14B_480p.safetensors" \
-    "Wan2.2 I2V 14B 480p"
-
-  # VAE
-  dl \
-    "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/Wan2.2_VAE.safetensors" \
-    "$COMFYUI_DIR/models/vae/Wan2.2_VAE.safetensors" \
-    "Wan2.2 VAE"
-
-  # Text Encoders
-  dl \
-    "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth" \
-    "$COMFYUI_DIR/models/text_encoders/clip_xlm_roberta_large.pth" \
-    "CLIP Encoder"
-
-  dl \
-    "https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/models_t5_umt5-xxl-enc-bf16.pth" \
-    "$COMFYUI_DIR/models/text_encoders/umt5_xxl.pth" \
-    "T5 Encoder"
-
-  # NSFW Motion LoRA（需要 Civitai API Key）
-  if [ -n "$CIVITAI_API_KEY" ]; then
-    DOGGY_PATH="$COMFYUI_DIR/models/loras/nsfw_motion/doggy_slider.safetensors"
-    if [ ! -f "$DOGGY_PATH" ]; then
-      echo "⬇️  下载 LoRA: Doggy Style Slider"
-      aria2c -x 4 -s 4 --console-log-level=error \
-        -o "doggy_slider.safetensors" \
-        -d "$COMFYUI_DIR/models/loras/nsfw_motion" \
-        "https://civitai.com/api/download/models/949735?token=${CIVITAI_API_KEY}"
-      echo "✅ Doggy Slider LoRA 下载完成"
-    else
-      echo "✅ Doggy Slider LoRA 已存在"
-    fi
-  else
-    echo "⚠️  未设置 CIVITAI_API_KEY，跳过 LoRA 下载"
-  fi
+  # 直接调用统一下载脚本
+  bash "$TOOLKIT_DIR/scripts/download_models.sh"
 fi
 
 # ---------- 6. 启动 ComfyUI ----------

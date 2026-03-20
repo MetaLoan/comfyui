@@ -1,10 +1,33 @@
-# Wan 2.2 模型（Hugging Face）
-# Wan2.2-I2V-14B 主模型
-https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/wan2.2_i2v_14B_480p.safetensors
+# =============================================================================
+# Wan 2.2 NSFW 增强版模型配置
+# =============================================================================
+#
+# ❗ 重要说明：
+#   原版 Wan 2.2（来自 HuggingFace Wan-AI 官方）内置内容过滤，NSFW 效果差。
+#   推荐使用以下社区增强版（Abliterated / NSFW-Unlocked）：
+#
+# -----------------------------------------------------------------------------
+# 【推荐】选项 A：Civitai NSFW 增强版（质量最好）
+# -----------------------------------------------------------------------------
+# 下载脚本会自动通过 Civitai API 下载以下模型：
+#
+# Wan2.2 I2V 14B NSFW Unlocked（Abliterated）
+# Civitai 搜索关键词："Wan 2.2 I2V NSFW" 或 "Wan2.2 abliterated"
+# 常见版本 Model ID 示例（以实际 Civitai 页面为准）：
+#
+# civitai|wan2.2_i2v_nsfw|1115893|models/wan
+#
+# -----------------------------------------------------------------------------
+# 【备选】选项 B：HuggingFace 社区版（无需 Civitai Key）
+# -----------------------------------------------------------------------------
+# 以下为社区上传的解锁版，从 HuggingFace 直接下载：
 
-# VAE
-https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/Wan2.2_VAE.safetensors
+# Wan 2.2 I2V 480p NSFW 社区版（约 14GB）
+hf|wan2.2_i2v_480p_nsfw|Kijai/WanVideo2.2-NSFW-abliterated/resolve/main/wan2.2_i2v_14B_480p_nsfw.safetensors|models/wan
 
-# Text Encoder（CLIP + T5）
-https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth
-https://huggingface.co/Wan-AI/Wan2.2-I2V-14B/resolve/main/models_t5_umt5-xxl-enc-bf16.pth
+# VAE（官方，无限制）
+hf|Wan2.2_VAE|Wan-AI/Wan2.2-I2V-14B/resolve/main/Wan2.2_VAE.safetensors|models/vae
+
+# Text Encoders（官方，无限制）
+hf|clip_xlm_roberta_large|Wan-AI/Wan2.2-I2V-14B/resolve/main/models_clip_open-clip-xlm-roberta-large-vit-huge-14.pth|models/text_encoders
+hf|umt5_xxl|Wan-AI/Wan2.2-I2V-14B/resolve/main/models_t5_umt5-xxl-enc-bf16.pth|models/text_encoders

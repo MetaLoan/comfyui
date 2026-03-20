@@ -6,7 +6,8 @@
 set -e
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-COMFYUI_DIR="$REPO_DIR/ComfyUI"
+# 支持外部环境变量覆盖 COMFYUI_DIR（RunPod 环境用）
+COMFYUI_DIR="${COMFYUI_DIR:-$REPO_DIR/ComfyUI}"
 
 # 自动加载 .env
 if [ -f "$REPO_DIR/.env" ]; then

@@ -4,6 +4,10 @@
 # 用途：在全新 RunPod 实例上自动完成 ComfyUI 环境搭建并启动服务
 #
 # 使用方式（在 RunPod Terminal 中执行）：
+#   CIVITAI_API_KEY=你的key curl -fsSL https://raw.githubusercontent.com/MetaLoan/comfyui/main/scripts/start_runpod.sh | bash
+#
+# 或先设置环境变量再运行：
+#   export CIVITAI_API_KEY=你的key
 #   curl -fsSL https://raw.githubusercontent.com/MetaLoan/comfyui/main/scripts/start_runpod.sh | bash
 #
 # 可选环境变量：
@@ -30,7 +34,7 @@ echo "============================================================"
 
 # ---------- 1. 系统依赖 ----------
 echo ""
-echo "[1/6] 安装系统依赖..."
+echo "[1/7] 安装系统依赖..."
 
 apt-get update -qq
 apt-get install -y -qq \
@@ -43,7 +47,7 @@ echo "✅ 系统依赖安装完成"
 
 # ---------- 2. clone 本仓库 ----------
 echo ""
-echo "[2/6] 获取工具包..."
+echo "[2/7] 获取工具包..."
 
 if [ -d "$TOOLKIT_DIR" ]; then
   echo "✅ 工具包已存在，更新中..."
@@ -54,9 +58,23 @@ fi
 
 echo "✅ 工具包就绪"
 
-# ---------- 3. clone & 配置 ComfyUI ----------
+# ---------- 3. 加载环境变量 ----------
 echo ""
-echo "[3/6] 配置 ComfyUI..."
+echo "[3/7] 加载环境配置..."
+
+# 优先用 RunPod Secret / 外部传入的环境变量，其次读 .env
+if [ -z "$CIVITAI_API_KEY" ] && [ -f "$TOOLKIT_DIR/.env" ]; then
+  export $(grep -v '^#' "$TOOLKIT_DIR/.env" | grep -v '^\s*$' | xargs)
+  echo "✅ 已从 .env 加载 API Keys"
+elif [ -n "$CIVITAI_API_KEY" ]; then
+  echo "✅ 使用外部传入的 CIVITAI_API_KEY"
+else
+  echo "⚠️  未发现 CIVITAI_API_KEY，LoRA 下载将跳过"
+fi
+
+# ---------- 4. clone & 配置 ComfyUI ----------
+echo ""
+echo "[4/7] 配置 ComfyUI..."
 
 if [ -d "$COMFYUI_DIR" ]; then
   echo "✅ ComfyUI 已存在，更新中..."
@@ -77,9 +95,9 @@ mkdir -p models/wan models/vae models/text_encoders models/loras/nsfw_motion
 mkdir -p "$WORKSPACE/outputs"
 [ -L "$COMFYUI_DIR/output" ] || { rm -rf "$COMFYUI_DIR/output"; ln -s "$WORKSPACE/outputs" "$COMFYUI_DIR/output"; }
 
-# ---------- 4. 安装自定义节点 ----------
+# ---------- 5. 安装自定义节点 ----------
 echo ""
-echo "[4/6] 安装自定义节点..."
+echo "[5/7] 安装自定义节点..."
 
 CUSTOM_NODES_DIR="$COMFYUI_DIR/custom_nodes"
 mkdir -p "$CUSTOM_NODES_DIR"
@@ -120,20 +138,21 @@ install_node "ComfyUI-KJNodes" \
   "https://github.com/kijai/ComfyUI-KJNodes.git" \
   "requirements.txt"
 
-# ---------- 5. 下载模型 ----------
+# ---------- 6. 下载模型 ----------
 echo ""
-echo "[6/6] 下载模型..."
+echo "[6/7] 下载模型..."
 
 if [ "${SKIP_MODELS:-0}" = "1" ]; then
   echo "⚠️  SKIP_MODELS=1，跳过模型下载（调试模式）"
 else
-  # 直接调用统一下载脚本
+  # 导出 COMFYUI_DIR 让 download_models.sh 使用正确路径
+  export COMFYUI_DIR
   bash "$TOOLKIT_DIR/scripts/download_models.sh"
 fi
 
-# ---------- 6. 启动 ComfyUI ----------
+# ---------- 7. 启动 ComfyUI ----------
 echo ""
-echo "[6/6] 启动 ComfyUI..."
+echo "[7/7] 启动 ComfyUI..."
 
 # 复制工作流到 ComfyUI
 mkdir -p "$COMFYUI_DIR/user/default/workflows"

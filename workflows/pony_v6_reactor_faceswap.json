@@ -287,16 +287,14 @@
         true,
         "inswapper_128.onnx",
         "retinaface_resnet50",
-        "GFPGANv1.4",
+        "none",
         1.0,
         1.0,
         "no",
-        "0",
-        "0",
-        "gender-based",
         "no",
-        "Face Parsing",
-        1.0
+        "0",
+        "0",
+        1
       ]
     },
     {

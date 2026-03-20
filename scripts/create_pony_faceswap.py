@@ -65,8 +65,8 @@ workflow = {
       ],
       "outputs": [{"name": "IMAGE", "type": "IMAGE", "links": [11]}],
       "widgets_values": [
-        True, "inswapper_128.onnx", "retinaface_resnet50", "GFPGANv1.4", 1.0, 1.0, 
-        "no", "0", "0", "gender-based", "no", "Face Parsing", 1.0
+        True, "inswapper_128.onnx", "retinaface_resnet50", "none", 1.0, 1.0, 
+        "no", "no", "0", "0", 1
       ]
     },
     {

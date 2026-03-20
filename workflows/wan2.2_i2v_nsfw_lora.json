@@ -1,0 +1,235 @@
+{
+  "_info": "Wan 2.2 I2V NSFW Motion LoRA 工作流 — 拖入 ComfyUI 界面加载",
+  "_usage": "输入参考图 + 动作描述 Prompt，调节 LoRA 权重控制动作强度",
+  "_lora_weight_guide": {
+    "0.0": "静态/极轻微动作",
+    "0.5-0.8": "自然流畅动作（推荐起始）",
+    "1.0-1.2": "标准激烈动作",
+    "1.5-2.0": "极度激烈（可能有形变）"
+  },
+  "last_node_id": 20,
+  "last_link_id": 25,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "WanVideoModelLoader",
+      "pos": [50, 100],
+      "size": [350, 120],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "model", "type": "WANVIDEOMODEL", "links": [1]}],
+      "properties": {"Node name for S&R": "WanVideoModelLoader"},
+      "widgets_values": [
+        "wan/wan2.2_i2v_14B_480p.safetensors",
+        "bf16",
+        "offload_model"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "WanVideoVAELoader",
+      "pos": [50, 260],
+      "size": [350, 80],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "vae", "type": "WANVIDEOVAE", "links": [2]}],
+      "properties": {"Node name for S&R": "WanVideoVAELoader"},
+      "widgets_values": ["vae/Wan2.2_VAE.safetensors"]
+    },
+    {
+      "id": 3,
+      "type": "CLIPLoader",
+      "pos": [50, 380],
+      "size": [350, 100],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [{"name": "clip", "type": "CLIP", "links": [3, 4]}],
+      "properties": {"Node name for S&R": "CLIPLoader"},
+      "widgets_values": ["text_encoders/umt5_xxl.pth", "wan", "default"]
+    },
+    {
+      "id": 4,
+      "type": "LoraLoaderModelOnly",
+      "pos": [450, 100],
+      "size": [380, 120],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "WANVIDEOMODEL", "link": 1}
+      ],
+      "outputs": [{"name": "MODEL", "type": "WANVIDEOMODEL", "links": [5]}],
+      "properties": {"Node name for S&R": "LoraLoaderModelOnly"},
+      "widgets_values": [
+        "loras/nsfw_motion/doggy_slider.safetensors",
+        1.0
+      ]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [450, 280],
+      "size": [380, 200],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [{"name": "clip", "type": "CLIP", "link": 3}],
+      "outputs": [{"name": "CONDITIONING", "type": "CONDITIONING", "links": [6]}],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": [
+        "woman from behind, doggy style position, realistic thrusting motion, hips bouncing rhythmically, detailed skin texture, sweat, natural physics, side view, cinematic lighting, 8k quality, BREAK dynamicDoggyThrust"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [450, 510],
+      "size": [380, 180],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [{"name": "clip", "type": "CLIP", "link": 4}],
+      "outputs": [{"name": "CONDITIONING", "type": "CONDITIONING", "links": [7]}],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": [
+        "blurry, deformed, distorted limbs, extra limbs, bad anatomy, low quality, watermark, text, cartoon, 3d render, ugly"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "LoadImage",
+      "pos": [50, 520],
+      "size": [300, 120],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [8]},
+        {"name": "MASK", "type": "MASK", "links": []}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["reference_image.png", "image"]
+    },
+    {
+      "id": 8,
+      "type": "WanVideoI2VEncode",
+      "pos": [880, 100],
+      "size": [380, 200],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "positive", "type": "CONDITIONING", "link": 6},
+        {"name": "negative", "type": "CONDITIONING", "link": 7},
+        {"name": "vae", "type": "WANVIDEOVAE", "link": 2},
+        {"name": "image", "type": "IMAGE", "link": 8}
+      ],
+      "outputs": [
+        {"name": "positive", "type": "CONDITIONING", "links": [9]},
+        {"name": "negative", "type": "CONDITIONING", "links": [10]},
+        {"name": "latent", "type": "LATENT", "links": [11]}
+      ],
+      "properties": {"Node name for S&R": "WanVideoI2VEncode"},
+      "widgets_values": [
+        81,
+        512,
+        896,
+        "center"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "WanVideoSampler",
+      "pos": [1310, 100],
+      "size": [380, 280],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "WANVIDEOMODEL", "link": 5},
+        {"name": "positive", "type": "CONDITIONING", "link": 9},
+        {"name": "negative", "type": "CONDITIONING", "link": 10},
+        {"name": "latent", "type": "LATENT", "link": 11}
+      ],
+      "outputs": [{"name": "latent", "type": "LATENT", "links": [12]}],
+      "properties": {"Node name for S&R": "WanVideoSampler"},
+      "widgets_values": [
+        42,
+        "euler",
+        "sgm_uniform",
+        30,
+        6.0,
+        1,
+        true
+      ]
+    },
+    {
+      "id": 10,
+      "type": "WanVideoDecode",
+      "pos": [1740, 100],
+      "size": [300, 120],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "vae", "type": "WANVIDEOVAE", "link": 2},
+        {"name": "latent", "type": "LATENT", "link": 12}
+      ],
+      "outputs": [{"name": "image", "type": "IMAGE", "links": [13]}],
+      "properties": {"Node name for S&R": "WanVideoDecode"},
+      "widgets_values": [true, "center"]
+    },
+    {
+      "id": 11,
+      "type": "VHS_VideoCombine",
+      "pos": [2090, 100],
+      "size": [340, 280],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 13}
+      ],
+      "outputs": [{"name": "Filenames", "type": "VHS_FILENAMES", "links": []}],
+      "properties": {"Node name for S&R": "VHS_VideoCombine"},
+      "widgets_values": [
+        24,
+        4,
+        "nsfw_motion_output",
+        "video/h264-mp4",
+        true,
+        false,
+        "default",
+        ""
+      ]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 4, 0, "WANVIDEOMODEL"],
+    [2, 2, 0, 8, 2, "WANVIDEOVAE"],
+    [3, 3, 0, 5, 0, "CLIP"],
+    [4, 3, 0, 6, 0, "CLIP"],
+    [5, 4, 0, 9, 0, "WANVIDEOMODEL"],
+    [6, 5, 0, 8, 0, "CONDITIONING"],
+    [7, 6, 0, 8, 1, "CONDITIONING"],
+    [8, 7, 0, 8, 3, "IMAGE"],
+    [9, 8, 0, 9, 1, "CONDITIONING"],
+    [10, 8, 1, 9, 2, "CONDITIONING"],
+    [11, 8, 2, 9, 3, "LATENT"],
+    [12, 9, 0, 10, 1, "LATENT"],
+    [13, 10, 0, 11, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 0.5, "offset": [0, 0]}
+  },
+  "version": 0.4
+}

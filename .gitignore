@@ -1,0 +1,34 @@
+# ===== 模型权重文件（体积巨大，不提交 git）=====
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.gguf
+
+# ===== ComfyUI 本体（本地安装，不提交）=====
+ComfyUI/
+comfyui_venv/
+venv/
+__pycache__/
+*.pyc
+
+# ===== 输出文件 =====
+outputs/
+output/
+*.mp4
+*.webm
+*.gif
+*.png
+*.jpg
+*.jpeg
+
+# ===== 系统文件 =====
+.DS_Store
+.env
+*.log
+
+# ===== 临时文件 =====
+tmp/
+temp/
+.tmp/

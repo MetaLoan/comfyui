@@ -465,7 +465,7 @@
           "name": "clip_embeds",
           "shape": 7,
           "type": "WANVIDIMAGE_CLIPEMBEDS",
-          "link": 82
+          "link": null
         },
         {
           "name": "start_image",

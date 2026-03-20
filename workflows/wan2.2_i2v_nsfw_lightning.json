@@ -465,7 +465,7 @@
           "name": "clip_embeds",
           "shape": 7,
           "type": "WANVIDIMAGE_CLIPEMBEDS",
-          "link": 82
+          "link": null
         },
         {
           "name": "start_image",
@@ -904,7 +904,7 @@
           "name": "lora",
           "shape": 7,
           "type": "WANVIDLORA",
-          "link": 89
+          "link": 190
         },
         {
           "name": "vram_management_args",

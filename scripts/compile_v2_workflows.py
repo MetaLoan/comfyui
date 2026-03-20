@@ -28,6 +28,14 @@ links_to_keep = [l for l in links_to_keep if l[0] != 82] # remove link to clip_e
 # And WanVideoTextEncode (id 16) outputs text_embeds? Yes.
 data["links"] = links_to_keep
 
+# Clean up dangling links in node inputs
+for node in data["nodes"]:
+    if "inputs" in node:
+        for inp in node["inputs"]:
+            if "link" in inp and inp["link"] is not None:
+                if not any(l[0] == inp["link"] for l in links_to_keep):
+                    inp["link"] = None
+
 new_nodes = []
 for node in data["nodes"]:
     if node["id"] == 22: # WanVideoModelLoader
@@ -100,6 +108,13 @@ for node in data["nodes"]:
         # Add links
         data["links"].append([189, 69, 0, 169, 0, "WANVIDLORA"])  # 69 -> 169
         data["links"].append([190, 169, 0, 22, 2, "WANVIDLORA"]) # 169 -> 22
+
+        # Fix node 22 inputs
+        for n22 in data["nodes"]:
+            if n22["id"] == 22:
+                for inp in n22["inputs"]:
+                    if inp.get("name") == "lora":
+                        inp["link"] = 190
 
 data["nodes"].extend(new_nodes)
 

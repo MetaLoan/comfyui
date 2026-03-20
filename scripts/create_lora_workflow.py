@@ -2,7 +2,7 @@ import json
 import os
 
 source_path = "/tmp/Rapid-AIO-Mega.json"
-dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_stand_in_lora_v14.json')
+dest_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'workflows', 'wan2.2_mega_aio_stand_in_lora_v15.json')
 
 with open(source_path, 'r', encoding='utf-8') as f:
     data = json.load(f)
@@ -25,7 +25,7 @@ for node in data["nodes"]:
         node["widgets_values"][4] = "euler"
         node["widgets_values"][5] = "beta"
     elif node["type"] == "PrimitiveInt" and node["id"] == 48:
-        node["widgets_values"][0] = 49
+        node["widgets_values"][0] = 17 # Drop frames severely from 49 to 17 to survive FP8 upcasting overhead
     elif node["type"] == "CLIPTextEncode":
         if node["id"] == 9:
             base = "(exact same person as the reference image:1.6), (identical facial identity:1.6), (preserve original face exactly:1.5), (consistent character identity throughout all frames:1.5), (same face, no face change, no identity drift, no reconstruction, no beautification, no morphing:1.4), face remains exactly the same person from start to end, photorealistic portrait fidelity, detailed original facial features and structure, natural skin texture and pores as in input image, no alterations to facial appearance, "
@@ -111,4 +111,4 @@ data["last_link_id"] = max([l[0] for l in data["links"]]) + 10
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)
 
-print(f"✅ LoRA Workflow Generated (v14): {dest_path}")
+print(f"✅ LoRA Workflow Generated (v15): {dest_path}")

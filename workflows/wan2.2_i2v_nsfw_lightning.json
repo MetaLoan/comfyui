@@ -2,7 +2,7 @@
   "id": "206247b6-9fec-4ed2-8927-e4f388c674d4",
   "revision": 0,
   "last_node_id": 80,
-  "last_link_id": 200,
+  "last_link_id": 102,
   "nodes": [
     {
       "id": 36,
@@ -668,7 +668,7 @@
         "Node name for S&R": "WanVideoLoraSelect"
       },
       "widgets_values": [
-        "nsfw_motion/wan_nsfw_e14.safetensors",
+        "lightning/lightx2v_I2V_14B_480p.safetensors",
         1.0,
         false,
         "<details><summary><b>Metadata</b></summary><table border='0' cellpadding='3'><tr><td colspan='2'><b>Metadata</b></td></tr><tr><td>No metadata found</td></tr></table></details>"
@@ -904,7 +904,7 @@
           "name": "lora",
           "shape": 7,
           "type": "WANVIDLORA",
-          "link": 190
+          "link": 89
         },
         {
           "name": "vram_management_args",
@@ -1040,46 +1040,6 @@
       },
       "color": "#223",
       "bgcolor": "#335"
-    },
-    {
-      "id": 169,
-      "type": "WanVideoLoraSelect",
-      "pos": [
-        -558.93408203125,
-        -605.2188415527344
-      ],
-      "size": [
-        583,
-        176
-      ],
-      "flags": {},
-      "order": 11,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "prev_lora",
-          "type": "WANVIDLORA",
-          "link": 189
-        }
-      ],
-      "outputs": [
-        {
-          "name": "lora",
-          "type": "WANVIDLORA",
-          "links": [
-            190
-          ]
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "WanVideoLoraSelect"
-      },
-      "widgets_values": [
-        "lightning/lightx2v_I2V_14B_480p.safetensors",
-        1.0,
-        false,
-        ""
-      ]
     }
   ],
   "links": [
@@ -1180,6 +1140,14 @@
       "INT"
     ],
     [
+      89,
+      69,
+      0,
+      22,
+      2,
+      "WANVIDLORA"
+    ],
+    [
       90,
       22,
       0,
@@ -1202,22 +1170,6 @@
       70,
       1,
       "BLOCKSWAPARGS"
-    ],
-    [
-      189,
-      69,
-      0,
-      169,
-      0,
-      "WANVIDLORA"
-    ],
-    [
-      190,
-      169,
-      0,
-      22,
-      2,
-      "WANVIDLORA"
     ]
   ],
   "groups": [

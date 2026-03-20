@@ -62,14 +62,14 @@ for node in data["nodes"]:
         # The sampler for lightning usually wants CFG=1.0. In WanVideoSampler V2, where is CFG?
         # Typically CFG is not here, it's shift or something else? We will just keep default feta/sampler args.
     elif node["id"] == 69: # WanVideoLoraSelect (Original)
-        # We repurpose this to load the NSFW LoRA
-        node["widgets_values"][0] = "nsfw_motion/wan_nsfw_e14.safetensors"
-        node["widgets_values"][1] = 1.0 # strength
+        # User failed to download nsfw_motion lora due to Civitai restrictions.
+        # Use lightning lora here to pass validation. For non-lightning workflow, we set strength to 0.0.
+        node["widgets_values"][0] = "lightning/lightx2v_I2V_14B_480p.safetensors"
+        node["widgets_values"][1] = 0.0 # Disabled for non-lightning HQ version
         
 # ------------------------------------------------------------------------------------------
 # --- 1. First, save the NON-LIGHTNING (high quality) V2 workflow ---
 # ------------------------------------------------------------------------------------------
-# Find sampler to set high quality steps
 for node in data["nodes"]:
     if node["id"] == 27:
         node["widgets_values"][0] = 30 # 30 steps for standard quality
@@ -80,48 +80,16 @@ with open(lora_dest_path, 'w', encoding='utf-8') as f:
 
 
 # ------------------------------------------------------------------------------------------
-# --- 2. Second, mutate data to add Lightning LoRA and save LIGHTNING V2 workflow ---
+# --- 2. Second, mutate data to save LIGHTNING V2 workflow ---
 # ------------------------------------------------------------------------------------------
 for node in data["nodes"]:
     if node["id"] == 27:
         node["widgets_values"][0] = 4 # 4 steps for lightning
-    
-    if node["id"] == 69:
-        # Now we insert a SECOND LoRA node for Lightning
-        new_lora = {
-            "id": 169,
-            "type": "WanVideoLoraSelect",
-            "pos": [node["pos"][0], node["pos"][1] - 200],
-            "size": [583, 176],
-            "flags": {},
-            "order": node["order"] + 1,
-            "mode": 0,
-            "inputs": [{"name": "prev_lora", "type": "WANVIDLORA", "link": 189}],
-            "outputs": [{"name": "lora", "type": "WANVIDLORA", "links": [190]}],
-            "properties": {"Node name for S&R": "WanVideoLoraSelect"},
-            "widgets_values": ["lightning/lightx2v_I2V_14B_480p.safetensors", 1.0, False, ""]
-        }
-        new_nodes.append(new_lora)
-        
-        # Original node 69 outputting to 22 via link [89, 69, 0, 22, 2, "WANVIDLORA"]
-        # We will change it so 69 -> 169 -> 22
-        # First remove link 89
-        data["links"] = [l for l in data["links"] if l[0] != 89]
-        # Add links
-        data["links"].append([189, 69, 0, 169, 0, "WANVIDLORA"])  # 69 -> 169
-        data["links"].append([190, 169, 0, 22, 2, "WANVIDLORA"]) # 169 -> 22
-
-        # Fix node 22 inputs
-        for n22 in data["nodes"]:
-            if n22["id"] == 22:
-                for inp in n22["inputs"]:
-                    if inp.get("name") == "lora":
-                        inp["link"] = 190
+    elif node["id"] == 69:
+        node["widgets_values"][1] = 1.0 # Enable lightning strength
 
 data["last_node_id"] = max([n["id"] for n in data["nodes"]]) + 10
 data["last_link_id"] = max([l[0] for l in data["links"]]) + 10
-
-data["nodes"].extend(new_nodes)
 
 with open(dest_path, 'w', encoding='utf-8') as f:
     json.dump(data, f, ensure_ascii=False, indent=2)

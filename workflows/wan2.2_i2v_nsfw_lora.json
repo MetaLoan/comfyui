@@ -668,8 +668,8 @@
         "Node name for S&R": "WanVideoLoraSelect"
       },
       "widgets_values": [
-        "nsfw_motion/wan_nsfw_e14.safetensors",
-        1.0,
+        "lightning/lightx2v_I2V_14B_480p.safetensors",
+        0.0,
         false,
         "<details><summary><b>Metadata</b></summary><table border='0' cellpadding='3'><tr><td colspan='2'><b>Metadata</b></td></tr><tr><td>No metadata found</td></tr></table></details>"
       ]
